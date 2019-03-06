@@ -1,0 +1,20 @@
+pragma solidity ^0.4.19;
+import "browser/crime.sol";//include the same file name
+
+contract hotel{  //contract name
+
+   CriminalRecords c1 = CriminalRecords(0x0fdf4894a3b7c5a101686829063be52ad45bcfb7);
+                                           	 
+                                            	//s1 is an instance
+                                            	//copy the address of the imported file(PuneHackathon.sol)
+                                           	 
+
+
+	function checkcriminal(address vaddress) constant returns (string){
+        	if(c1.checkifcriminal(vaddress)){//"checkifcriminal" is a function in PuneHackathon.sol
+            	return "is a criminal";
+        	}
+    
+    	return "Not a criminal";
+	}
+}

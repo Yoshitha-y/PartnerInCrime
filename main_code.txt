@@ -1,0 +1,139 @@
+pragma solidity ^0.4.24;
+
+contract CriminalRecords {
+
+    enum status{
+        closed,
+        open
+    }
+    
+    enum diagnostic{
+        allowed,
+        notallowed
+    }
+    
+    struct diagnostictest{
+        address addressofdiagnostic;
+        string report;
+        uint caseid;
+    }
+    
+    struct fir{
+        
+            uint id;
+            uint time;
+            string incedent;
+            string place;
+            status Status;
+            diagnostic Diagnostic;
+    }
+
+    struct record{
+        string Criminalname;
+        uint age;
+        address criminalwalletaddress;
+        bool TraveAbrowadAllwoed;
+    }
+    
+    mapping (address => record) records;
+    
+    mapping (uint => fir) firrecords;
+    
+    mapping (uint => diagnostictest) Diagnostictest;
+    
+    uint[] caseides;
+    
+    address[] criminaladdresses;
+    
+    address policedepartment;
+    address court;
+    
+    constructor(){
+        policedepartment = 0xca35b7d915458ef540ade6068dfe2f44e8fa733c;
+        court = 0x14723a09acff6d2a60dcdf7aa4aff308fddc160c;
+    }
+    
+    modifier onlypolicedepartment{
+        require(policedepartment == msg.sender);
+        _;
+    }
+    
+    modifier onlycourt{
+        require(court == msg.sender);
+        _;
+    }
+    
+    modifier diagnosticrequire(uint _id){
+        if(firrecords[_id].Diagnostic == diagnostic.allowed)
+        _;
+    }
+    
+    function SetFir(uint _id,string _incedent,string _place)public onlypolicedepartment {
+        
+        firrecords[_id].id = _id;
+        firrecords[_id].time = now;
+        firrecords[_id].Status=status.open;
+        firrecords[_id].incedent = _incedent;
+        firrecords[_id].place = _place;
+        caseides.push(_id);
+    }
+    
+    function setcriminal(address _address,bool _TraveAbrowadAllwoed,string _Criminalname,uint _age) public onlypolicedepartment {
+        records[_address].Criminalname = _Criminalname;
+        records[_address].age = _age;
+        records[_address].criminalwalletaddress = _address;
+        records[_address].TraveAbrowadAllwoed = _TraveAbrowadAllwoed;
+         criminaladdresses.push(_address);
+    }
+    
+    function getcriminaldetails(address _address) constant public returns(string,uint,address,bool){
+        return(records[_address].Criminalname,records[_address].age,records[_address].criminalwalletaddress,records[_address].TraveAbrowadAllwoed );
+        
+    }
+    
+    function Getfir(uint _id) public constant returns (uint,uint,string,string){
+        
+        fir storage Firs = firrecords [_id];
+        return(Firs.id , Firs.time, Firs.incedent,Firs.place);
+    }
+    
+    function displayallcaseids() constant public returns (uint[]){
+        return caseides;
+    }
+
+    function checkcriminalids() constant public returns(address[]){
+        return criminaladdresses;
+    }
+    
+    function checkifcriminal(address _address) constant public returns(bool){
+      if(records[_address].criminalwalletaddress == _address)
+      return true;
+      else
+     return false;
+    }
+
+    function currentstatusofcase(uint _id,status _Status) public onlycourt {
+        firrecords[_id].Status = _Status;
+    }
+    
+    function checkcurrestatus(uint _id) public constant returns(status){
+        return (firrecords[_id].Status);
+    }
+    
+    function diagnosticaapproval(uint _id,diagnostic _diagnostic) public onlycourt{
+        require(firrecords[_id].Status == status.open) ;
+        firrecords[_id].Diagnostic = _diagnostic;
+    }
+    
+    function setdiagnostic(uint _id,string _report,address _addressofdiagnostic)public{
+        Diagnostictest[_id].caseid = _id;
+        Diagnostictest[_id].report = _report;
+        Diagnostictest[_id].addressofdiagnostic = _addressofdiagnostic;
+    }
+    
+    function getdiagnostic(uint _id) constant public returns(uint,string,address){
+        return(Diagnostictest[_id].caseid,
+        Diagnostictest[_id].report ,
+        Diagnostictest[_id].addressofdiagnostic);
+    }
+}
